@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>🔍 ตรวจสอบสถานะงาน พฐ.จว.ตรัง</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root { 
+      --navy: #0b192c; 
+      --navy-light: #1e3e62;
+      --gold: #d4af37; 
+      --gold-light: #f3e5ab;
+      --bg: #f8fafc; 
+      --line-green: #06c755; 
+      --card-shadow: 0 10px 30px -5px rgba(11, 25, 44, 0.08);
+      --hover-shadow: 0 20px 40px -10px rgba(11, 25, 44, 0.15);
+    }
+    
+    body { 
+      font-family: 'Sarabun', sans-serif; 
+      background-color: var(--bg); 
+      color: #334155; 
+      overflow-x: hidden;
+    }
+
+    .header-panel { 
+      background: linear-gradient(135deg, var(--navy) 0%, #112642 100%); 
+      color: white; 
+      padding: 45px 20px 70px 20px; 
+      border-radius: 0 0 45px 45px; 
+      box-shadow: 0 15px 35px rgba(11, 25, 44, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .header-panel::before {
+      content: '';
+      position: absolute;
+      top: -50px; right: -50px;
+      width: 200px; height: 200px;
+      background: rgba(212, 175, 55, 0.1);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .search-box { 
+      background: rgba(255, 255, 255, 0.95); 
+      backdrop-filter: blur(10px);
+      border-radius: 24px; 
+      padding: 30px; 
+      margin-top: -50px; 
+      box-shadow: var(--card-shadow); 
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+    .search-box:hover { box-shadow: var(--hover-shadow); }
+
+    .custom-input { 
+      border-radius: 14px; 
+      border: 1.5px solid #e2e8f0; 
+      height: 52px; 
+      font-size: 0.95rem;
+      padding-left: 15px;
+      transition: all 0.2s;
+      background-color: #f8fafc;
+    }
+    .custom-input:focus { 
+      border-color: var(--navy); 
+      box-shadow: 0 0 0 4px rgba(30, 62, 98, 0.1); 
+      background-color: #fff;
+    }
+
+    .btn-main { 
+      background: linear-gradient(135deg, var(--gold) 0%, #b89728 100%); 
+      color: var(--navy); 
+      font-weight: 700; 
+      border-radius: 14px; 
+      height: 52px; 
+      width: 100%; 
+      border: none; 
+      font-size: 1.05rem; 
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+      background: linear-gradient(135deg, #e0bc3c, var(--gold));
+      color: var(--navy);
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 15px 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+
+    .column-title { 
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); 
+      color: white; 
+      padding: 15px 22px; 
+      border-radius: 18px; 
+      font-weight: 700; 
+      margin-bottom: 20px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      box-shadow: 0 6px 15px rgba(11, 25, 44, 0.15);
+      border-bottom: 3px solid var(--gold);
+    }
+
+    .station-sub-header { 
+      background: #f1f5f9; 
+      color: var(--navy); 
+      padding: 10px 18px; 
+      border-radius: 12px; 
+      font-weight: 700; 
+      font-size: 0.95rem; 
+      margin: 20px 0 12px 0; 
+      border-left: 5px solid var(--navy); 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .result-card { 
+      background: white; 
+      border-radius: 20px; 
+      padding: 22px; 
+      margin-bottom: 15px; 
+      border: 1px solid #e2e8f0; 
+      position: relative; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .result-card:hover { 
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(11, 25, 44, 0.08);
+      border-color: #cbd5e1;
+    }
+
+    .case-id-header { 
+      background: #f8fafc; 
+      color: var(--navy); 
+      font-size: 1.15rem; 
+      font-weight: 800; 
+      padding: 6px 14px; 
+      border-radius: 10px; 
+      display: inline-block; 
+      border-left: 5px solid var(--gold); 
+      margin-bottom: 12px;
+      border-top: 1px solid #f1f5f9;
+      border-right: 1px solid #f1f5f9;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .status-badge { 
+      display: inline-flex; 
+      align-items: center; 
+      padding: 6px 14px; 
+      border-radius: 30px; 
+      font-size: 0.82rem; 
+      font-weight: 700; 
+      margin-top: 12px; 
+      gap: 5px;
+    }
+    .tag-1 { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; } 
+    .tag-2 { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; } 
+    .tag-3 { background: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; } 
+
+    .btn-line-mini { 
+      background: var(--line-green); 
+      color: white; 
+      border-radius: 10px; 
+      padding: 6px 14px; 
+      font-size: 11.5px; 
+      text-decoration: none; 
+      position: absolute; 
+      top: 20px; 
+      right: 20px; 
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 4px 10px rgba(6, 199, 85, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-line-mini:hover { background: #05b34c; color: white; transform: scale(1.05); }
+
+    .info-row { font-size: 0.9rem; color: #64748b; display: flex; align-items: center; margin-bottom: 6px; gap: 8px; }
+    
+    .share-summary-box { 
+      background: #ffffff; 
+      border: 2px solid var(--gold); 
+      border-radius: 24px; 
+      padding: 25px; 
+      margin-bottom: 35px; 
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.12); 
+    }
+    .share-text-area { 
+      background: #f8fafc; 
+      border: 1.5px solid #e2e8f0; 
+      border-radius: 16px; 
+      font-family: 'Sarabun', monospace; 
+      font-size: 0.85rem; 
+      padding: 16px; 
+      white-space: pre-wrap; 
+      word-break: break-word; 
+      max-height: 260px; 
+      overflow-y: auto; 
+      color: #1e293b; 
+      line-height: 1.6; 
+    }
+    .btn-line-share { background-color: var(--line-green); color: white; font-weight: 700; border-radius: 14px; border: none; padding: 12px 20px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-line-share:hover { background-color: #05b34c; color: white; }
+    .btn-copy { background-color: var(--navy); color: white; font-weight: 700; border-radius: 14px; border: none; padding: 12px 20px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-copy:hover { background-color: #112642; color: white; }
+
+    .filter-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin-top: 15px; }
+    .filter-pill {
+      background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;
+      padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+      white-space: nowrap; cursor: pointer; transition: all 0.2s;
+    }
+    .filter-pill.active, .filter-pill:hover { background: var(--navy); color: white; border-color: var(--navy); }
+
+    .app-toast {
+      position: fixed; top: -80px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px; background: #ffffff; color: #1f2937;
+      padding: 12px 22px; border-radius: 50px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+      border: 1px solid #e5e7eb; z-index: 99999; font-size: 14px; font-weight: 500;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); opacity: 0; pointer-events: none;
+    }
+    .app-toast.show { top: 24px; opacity: 1; pointer-events: auto; }
+    .app-toast-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; flex-shrink: 0; background-color: #10b981; }
+    .swal2-popup { font-family: 'Sarabun', sans-serif !important; border-radius: 16px !important; }
+  </style>
+</head>
+<body>
+
+<div class="header-panel text-center">
+  <div class="badge bg-white text-dark px-3 py-1 rounded-pill mb-2 fw-bold shadow-sm" style="font-size: 0.8rem; color: var(--navy) !important;">
+    <i class="material-icons-round align-middle me-1" style="font-size: 14px; color: var(--gold);">verified</i> ส่วนงานพิสูจน์หลักฐานจังหวัดตรัง
+  </div>
+  <h2 class="m-0 fw-bold tracking-tight">ระบบติดตามสถานะงานตรวจพิสูจน์</h2>
+  <div id="syncStatus" class="small text-white-50 mt-2">กำลังเชื่อมต่อฐานข้อมูล...</div>
+</div>
+
+<div class="container mb-5">
+  <div class="search-box">
+    <div class="row g-3">
+      <div class="col-12">
+        <label class="form-label small fw-bold text-muted mb-1"><i class="material-icons-round align-middle text-warning" style="font-size: 18px;">search</i> ค้นหาข้อมูลคดี</label>
+        <input type="text" id="keyword" class="form-control custom-input" placeholder="พิมพ์เลขตรวจพิสูจน์, ชื่อผู้ต้องหา หรือ พงส. ที่ต้องการค้นหา...">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label small fw-bold text-muted mb-1"><i class="material-icons-round align-middle text-primary" style="font-size: 18px;">location_on</i> เลือกสถานีตำรวจ (สภ.)</label>
+        <select id="stationSelect" class="form-select custom-input"></select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label small fw-bold text-muted mb-1"><i class="material-icons-round align-middle text-success" style="font-size: 18px;">filter_list</i> สถานะการดำเนินงาน</label>
+        <select id="statusFilter" class="form-select custom-input">
+          <option value="all">ทุกสถานะ (ภาพรวมทั้งหมด)</option>
+          <option value="1">✅ เสร็จแล้ว</option>
+          <option value="2">⏳ รอดำเนินการ</option>
+          <option value="3">📦 รับผลแล้ว</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <div class="filter-pills">
+          <span class="text-muted small align-self-center fw-bold me-1">ทางลัด:</span>
+          <div class="filter-pill active" onclick="quickFilter('all', this)">ทั้งหมด</div>
+          <div class="filter-pill" onclick="quickFilter('1', this)">✅ เสร็จแล้ว</div>
+          <div class="filter-pill" onclick="quickFilter('2', this)">⏳ รอดำเนินการ</div>
+          <div class="filter-pill" onclick="quickFilter('3', this)">📦 รับผลแล้ว</div>
+        </div>
+      </div>
+
+      <div class="col-12 mt-4">
+        <button class="btn btn-main" onclick="runSearch()">
+          <i class="material-icons-round">search</i> ค้นหาข้อมูลทันที
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-4" id="statsOverviewContainer">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon bg-info bg-opacity-10 text-info"><i class="material-icons-round">folder_shared</i></div>
+        <div>
+          <div class="text-muted small fw-bold">ข้อมูลในระบบทั้งหมด</div>
+          <h4 class="fw-bold mb-0 text-navy" id="statTotalCount">0 <span class="fs-6 fw-normal text-muted">รายการ</span></h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="material-icons-round">check_circle</i></div>
+        <div>
+          <div class="text-muted small fw-bold">ดำเนินการเสร็จสิ้น</div>
+          <h4 class="fw-bold mb-0 text-success" id="statDoneCount">0 <span class="fs-6 fw-normal text-muted">รายการ</span></h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="material-icons-round">pending_actions</i></div>
+        <div>
+          <div class="text-muted small fw-bold">อยู่ระหว่างดำเนินการ</div>
+          <h4 class="fw-bold mb-0 text-warning" id="statPendingCount">0 <span class="fs-6 fw-normal text-muted">รายการ</span></h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid px-3 mb-5">
+  <div id="summaryShareSection" class="d-none">
+    <div class="container">
+      <div class="share-summary-box">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="m-0 fw-bold text-navy d-flex align-items-center gap-2">
+            <i class="material-icons-round text-warning">description</i> ข้อความสรุปสำหรับแชร์เข้ากลุ่ม LINE
+          </h5>
+          <span class="badge bg-navy rounded-pill px-3 py-2" id="summaryTotalBadge">0 รายการ</span>
+        </div>
+        <div id="shareTextDisplay" class="share-text-area mb-3"></div>
+        <div class="d-flex gap-2 flex-wrap flex-md-nowrap">
+          <button class="btn btn-line-share flex-grow-1" onclick="shareToLine()">
+            <i class="material-icons-round">share</i> แชร์รายงานสรุปนี้ไปที่ LINE
+          </button>
+          <button class="btn btn-copy" onclick="copyShareText()">
+            <i class="material-icons-round">content_copy</i> คัดลอกข้อความ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4" id="displayArea">
+    <div class="col-12 text-center py-5 opacity-50">
+      <i class="material-icons-round text-muted" style="font-size: 80px;">saved_search</i>
+      <h5 class="fw-bold text-muted mt-3">กำลังโหลดข้อมูล กรุณารอสักครู่...</h5>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="appToast" class="app-toast">
+  <div class="app-toast-icon" id="appToastIcon">✓</div>
+  <div class="app-toast-message" id="appToastMessage">แจ้งเตือนสำเร็จ</div>
+</div>
+
+<script>
+  // 🔗 ใส่ Web App URL ของ Google Apps Script ของคุณเรียบร้อยแล้ว
+  const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxDz5nTAk0R_rKJyiXVFY6rxA2NIeCuF2v5HicpLEyLiQLqzMqzeV114lL7czppJfwyjQ/exec?action=getData';
+
+  let rawData = [];
+  let filteredData = [];
+  let currentFormattedMessage = "";
+  const CACHE_KEY = 'forensic_trang_vercel_v1';
+
+  const Notify = {
+    copySuccess: function(msg = 'คัดลอกข้อความสรุปเรียบร้อยแล้ว!') {
+      Swal.fire({ icon: 'success', title: msg, toast: true, position: 'top', showConfirmButton: false, timer: 1800, timerProgressBar: true });
+    },
+    error: function(title, text) { Swal.fire({ icon: 'error', title: title, text: text, confirmButtonText: 'ปิด' }); },
+    warning: function(title, text) { Swal.fire({ icon: 'warning', title: title, text: text, confirmButtonText: 'รับทราบ' }); },
+    loading: function(title = 'กำลังโหลดข้อมูล...') { Swal.fire({ title: title, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } }); },
+    close: function() { Swal.close(); }
+  };
+
+  window.onload = () => {
+    Notify.loading('กำลังเชื่อมต่อฐานข้อมูล...');
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const p = JSON.parse(cached);
+      rawData = p.data;
+      setupStations(p.stations);
+      updateOverviewStats(rawData);
+      Notify.close();
+      runSearch();
+    }
+    updateData();
+  };
+
+  function updateData() {
+    fetch(GAS_API_URL)
+      .then(res => res.json())
+      .then(res => {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(res));
+        rawData = res.data;
+        setupStations(res.stations);
+        document.getElementById('syncStatus').innerText = 'อัปเดตข้อมูลล่าสุดเรียบร้อย: ' + res.syncTime;
+        updateOverviewStats(rawData);
+        Notify.close();
+        runSearch();
+      })
+      .catch(err => {
+        console.error(err);
+        Notify.close();
+        Notify.error('ดึงข้อมูลไม่สำเร็จ', 'ไม่สามารถเชื่อมต่อฐานข้อมูล Google Sheets ได้ กรุณาตรวจสอบการอนุญาตสิทธิ์ Web App (Anyone)');
+      });
+  }
+
+  function updateOverviewStats(data) {
+    document.getElementById('statTotalCount').innerHTML = `${data.length} <span class="fs-6 fw-normal text-muted">รายการ</span>`;
+    const done = data.filter(d => getStatusInfo(d.st).id === "1" || getStatusInfo(d.st).id === "3").length;
+    const pending = data.filter(d => getStatusInfo(d.st).id === "2").length;
+    document.getElementById('statDoneCount').innerHTML = `${done} <span class="fs-6 fw-normal text-muted">รายการ</span>`;
+    document.getElementById('statPendingCount').innerHTML = `${pending} <span class="fs-6 fw-normal text-muted">รายการ</span>`;
+  }
+
+  function setupStations(stations) {
+    const select = document.getElementById('stationSelect');
+    select.innerHTML = '<option value="">ทุก สภ. ในจังหวัดตรัง</option>';
+    stations.forEach(s => {
+      let opt = document.createElement('option');
+      opt.value = s; opt.text = `สภ.${s}`;
+      select.appendChild(opt);
+    });
+  }
+
+  function getStatusInfo(st) {
+    if (st.includes('เสร็จ') && !st.includes('รับผล')) return { id: "1", label: 'เสร็จแล้ว', tag: 'tag-1', icon: 'check_circle', emoji: '🟢' };
+    if (st.includes('รับผล')) return { id: "3", label: 'รับผลแล้ว', tag: 'tag-3', icon: 'history', emoji: '📦' };
+    return { id: "2", label: 'รอดำเนินการ', tag: 'tag-2', icon: 'pending', emoji: '🟡' };
+  }
+
+  function groupByStation(items) {
+    return items.reduce((acc, item) => {
+      const stKey = item.s || "ไม่ระบุ สภ.";
+      if (!acc[stKey]) acc[stKey] = [];
+      acc[stKey].push(item);
+      return acc;
+    }, {});
+  }
+
+  function quickFilter(statusId, el) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('statusFilter').value = statusId;
+    runSearch();
+  }
+
+  function runSearch() {
+    const key = document.getElementById('keyword').value.trim().toLowerCase();
+    const station = document.getElementById('stationSelect').value;
+    const statFilt = document.getElementById('statusFilter').value;
+    
+    filteredData = rawData.filter(item => {
+      const info = getStatusInfo(item.st);
+      const mKey = !key || (item.n.toLowerCase().includes(key) || item.id.toLowerCase().includes(key) || item.s.toLowerCase().includes(key));
+      const mStation = !station || item.s === station;
+      const mStatus = statFilt === 'all' || info.id === statFilt;
+      return mKey && mStation && mStatus;
+    });
+
+    if (filteredData.length > 0) {
+      generateShareText(key, station);
+      renderCards(filteredData);
+      document.getElementById('summaryShareSection').classList.remove('d-none');
+    } else {
+      document.getElementById('summaryShareSection').classList.add('d-none');
+      document.getElementById('displayArea').innerHTML = `
+        <div class="col-12 text-center py-5">
+          <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block border">
+            <i class="material-icons-round text-warning" style="font-size: 60px;">sentiment_dissatisfied</i>
+            <h5 class="fw-bold mt-3 text-dark">ไม่พบข้อมูลตามเงื่อนไขที่ค้นหา</h5>
+            <p class="text-muted small mb-0">ลองเปลี่ยนคำค้นหา หรือเลือกตัวกรองสถานะใหม่อีกครั้งครับ</p>
+          </div>
+        </div>`;
+    }
+  }
+
+  function generateShareText(keyword, stationName) {
+    const stationHeader = stationName ? `สภ.${stationName}` : "ภาพรวมทุก สภ.";
+    const keyHeader = keyword ? ` [คำค้น: "${keyword}"]` : "";
+    
+    let msg = `🚨 [สรุปสถานะงานตรวจพิสูจน์ พฐ.จว.ตรัง] 🚨\n`;
+    msg += `🏛️ หน่วยงาน: ${stationHeader}${keyHeader}\n`;
+    msg += `📊 รายการค้นหาพบรวม: ${filteredData.length} รายการ\n`;
+    msg += `━━━━━━━━━━━━━━━━━━\n\n`;
+    
+    const drug = filteredData.filter(d => d.t === "งานยาเสพติด");
+    const scene = filteredData.filter(d => d.t === "งานที่เกิดเหตุ");
+    const gun = filteredData.filter(d => d.t === "งานทะเบียนปืน");
+
+    if (drug.length > 0) {
+      msg += `💊 【 งานตรวจยาเสพติด 】 (${drug.length} รายการ)\n`;
+      msg += `──────────────────\n`;
+      const groupedDrug = groupByStation(drug);
+      Object.keys(groupedDrug).sort().forEach(st => {
+        msg += `📍 สภ.${st}\n`;
+        groupedDrug[st].forEach((d, idx, arr) => {
+          const prefix = idx === arr.length - 1 ? '   └ ' : '   ├ ';
+          const info = getStatusInfo(d.st);
+          msg += `${prefix}${info.emoji} ${d.id} | ${d.n}\n`;
+        });
+        msg += `\n`;
+      });
+    }
+
+    if (scene.length > 0) {
+      msg += `🏠 【 งานตรวจสถานที่เกิดเหตุ 】 (${scene.length} รายการ)\n`;
+      msg += `──────────────────\n`;
+      const groupedScene = groupByStation(scene);
+      Object.keys(groupedScene).sort().forEach(st => {
+        msg += `📍 สภ.${st}\n`;
+        groupedScene[st].forEach((d, idx, arr) => {
+          const prefix = idx === arr.length - 1 ? '   └ ' : '   ├ ';
+          const info = getStatusInfo(d.st);
+          const pongsakorn = d.n.includes('พงส.') ? d.n : `พงส.${d.n}`;
+          msg += `${prefix}${info.emoji} ${d.id} | ${pongsakorn}\n`;
+        });
+        msg += `\n`;
+      });
+    }
+
+    if (gun.length > 0) {
+      msg += `🔫 【 งานทะเบียนปืน 】 (${gun.length} รายการ)\n`;
+      msg += `──────────────────\n`;
+      const groupedGun = groupByStation(gun);
+      Object.keys(groupedGun).sort().forEach(st => {
+        msg += `📍 สภ.${st}\n`;
+        groupedGun[st].forEach((d, idx, arr) => {
+          const prefix = idx === arr.length - 1 ? '   └ ' : '   ├ ';
+          const info = getStatusInfo(d.st);
+          const pongsakorn = d.n.includes('พงส.') ? d.n : `พงส.${d.n}`;
+          msg += `${prefix}${info.emoji} ${d.id} | ${pongsakorn}\n`;
+        });
+        msg += `\n`;
+      });
+    }
+    
+    msg += `━━━━━━━━━━━━━━━━━━\n`;
+    msg += `✨ หมายเหตุ: 🟢 เสร็จแล้ว | 🟡 รอดำเนินการ | 📦 รับผลแล้ว\n`;
+    msg += `📅 อัปเดตข้อมูล ณ วันที่: ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })}`;
+    
+    currentFormattedMessage = msg;
+    document.getElementById('shareTextDisplay').innerText = msg;
+    document.getElementById('summaryTotalBadge').innerText = `${filteredData.length} รายการ`;
+  }
+
+  function renderCards(data) {
+    const area = document.getElementById('displayArea');
+    area.innerHTML = '';
+    const config = [
+      { t: "งานยาเสพติด", i: "medication", label: "ชื่อผู้ต้องหา" },
+      { t: "งานที่เกิดเหตุ", i: "location_searching", label: "พนักงานสอบสวน" },
+      { t: "งานทะเบียนปืน", i: "security", label: "พนักงานสอบสวน" }
+    ];
+
+    config.forEach(conf => {
+      const typeData = data.filter(d => d.t === conf.t);
+      let html = `<div class="col-lg-4 col-12">
+        <div class="column-title">
+          <span><i class="material-icons-round align-middle me-2">${conf.i}</i>${conf.t}</span>
+          <span class="badge bg-white text-dark rounded-pill px-2.5 py-1 fw-bold">${typeData.length}</span>
+        </div>`;
+
+      if (typeData.length > 0) {
+        const grouped = groupByStation(typeData);
+        Object.keys(grouped).sort().forEach(st => {
+          html += `<div class="station-sub-header">
+            <span><i class="material-icons-round align-middle me-1 text-secondary" style="font-size:18px;">home</i>สภ.${st}</span>
+            <span class="badge bg-secondary bg-opacity-15 text-dark rounded-pill">${grouped[st].length} รายการ</span>
+          </div>`;
+          
+          grouped[st].forEach(item => {
+            const info = getStatusInfo(item.st);
+            
+            const shareMsg = `📢 [รายงานสถานะงาน - พฐ.จว.ตรัง]\n` +
+              `━━━━━━━━━━━━━━━\n` +
+              `📂 หมวดงาน: ${item.t}\n` +
+              `🔢 เลขตรวจ: ${item.id}\n` +
+              `👤 ${conf.label}: ${item.n}\n` +
+              `🏛️ หน่วยงาน: สภ.${item.s}\n` +
+              `📅 วันที่รับเรื่อง: ${item.d}\n` +
+              `📌 สถานะ: ${info.emoji} ${item.st}\n` +
+              `━━━━━━━━━━━━━━━\n` +
+              `🔍 ระบบติดตามงาน พฐ.ตรัง`;
+
+            html += `
+              <div class="result-card">
+                <a href="#" class="btn-line-mini" onclick="window.open('https://line.me/R/msg/text/?'+encodeURIComponent(\`${shareMsg}\`), '_blank')">
+                  <i class="material-icons-round" style="font-size:14px;">share</i> แชร์การ์ด
+                </a>
+                <div class="case-id-header">${item.id}</div>
+                <div class="mb-2">
+                  <span style="font-size:0.75rem; color:#94a3b8; display:block; font-weight: 600;">${conf.label}</span>
+                  <h6 class="fw-bold m-0 text-dark" style="font-size: 1.02rem;">${item.n}</h6>
+                </div>
+                <div class="info-row"><i class="material-icons-round text-muted" style="font-size:16px;">calendar_today</i>วันที่รับ: ${item.d}</div>
+                <div class="status-badge ${info.tag}">
+                  <i class="material-icons-round" style="font-size:15px;">${info.icon}</i> ${item.st}
+                </div>
+              </div>`;
+          });
+        });
+      } else {
+        html += `<div class="text-center p-4 bg-white rounded-4 mb-4 border text-muted small shadow-sm">ไม่มีข้อมูลในหมวดหมู่นี้</div>`;
+      }
+      
+      html += `</div>`;
+      area.innerHTML += html;
+    });
+  }
+
+  function shareToLine() {
+    if (!currentFormattedMessage) return;
+    if (navigator.share) {
+      navigator.share({ title: 'สรุปรายงานการตรวจพิสูจน์ พฐ.จว.ตรัง', text: currentFormattedMessage }).catch(() => {});
+    } else {
+      copyShareText();
+    }
+  }
+
+  function copyShareText() {
+    if (!currentFormattedMessage) return;
+    navigator.clipboard.writeText(currentFormattedMessage).then(() => {
+      Notify.copySuccess('คัดลอกข้อความสรุปเรียบร้อยแล้ว!');
+    });
+  }
+</script>
+
+</body>
+</html>
