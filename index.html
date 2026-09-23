@@ -32,7 +32,6 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg)}
 <div id="syncStatus" class="small text-white-50 mt-2">กำลังเชื่อมต่อฐานข้อมูล...</div>
 <div id="modeBadge" class="small mt-1 opacity-50"></div>
 </div>
-
 <div class="container mb-5">
 <div class="search-box">
 <div class="row g-3">
@@ -48,52 +47,35 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg)}
 <div class="col-md-4"><div class="card p-3 rounded-4"><div class="small text-muted">รอดำเนินการ</div><h4 id="statPendingCount" class="m-0">0</h4></div></div>
 </div>
 </div>
-
 <div class="container-fluid px-3 mb-5">
 <div id="summaryShareSection" class="d-none"><div class="container"><div class="share-summary-box"><div class="d-flex justify-content-between mb-3"><h5 class="m-0 fw-bold">📋 ข้อความสรุปสำหรับแชร์ LINE</h5><span class="badge bg-dark rounded-pill" id="summaryTotalBadge">0</span></div><div id="shareTextDisplay" class="share-text-area mb-3"></div><div class="d-flex gap-2"><button class="btn btn-success flex-grow-1 fw-bold" onclick="shareToLine()">แชร์ไป LINE</button><button class="btn btn-dark fw-bold" onclick="copyShareText()">คัดลอก</button></div></div></div></div>
 <div class="row g-4" id="displayArea"></div>
 </div>
-
 <script>
-// ★★★ ใส่ลิงก์ /exec ของคุณตรงนี้สำหรับ GitHub Pages ★★★
-const API_URL = 'https://script.google.com/macros/s/AKfycby15VcuGKvMEacd8nxadBTZwITqHTB5nITQbU-2aRcLtdwSC1OJE6kSdxrFp-SfJ7toQQ/exec';
-
+const API_URL = 'https://script.google.com/macros/s/AKfycby15VcuGKvMEacd8nxadBTZwITqHTB5nITQbU-2aRcLtdwSC1OJE6kSdxrFp-SfJ7toQQ/exec?action=getData';
 const Notify = {
  copySuccess: function(m){ Swal.fire({icon:'success',title:m||'คัดลอกแล้ว!',toast:true,position:'top',showConfirmButton:false,timer:2000}); },
  loading: function(t){ Swal.fire({title:t||'กำลังโหลด...',allowOutsideClick:false,didOpen:()=>{Swal.showLoading();}}); },
  close: function(){ Swal.close(); },
  error: function(t,m){ Swal.fire({icon:'error',title:t,text:m}); }
 };
-
 let rawData=[], filteredData=[], currentFormattedMessage='', shareStore=[];
 let IS_GAS = (typeof google!== 'undefined' && google.script && google.script.run);
-
 function updateData(){
   Notify.loading('กำลังเชื่อมต่อฐานข้อมูล...');
   document.getElementById('modeBadge').innerText = IS_GAS? 'โหมด: Google Apps Script โดยตรง' : 'โหมด: GitHub Pages (API)';
-
   if(IS_GAS){
-    // รันบน Google Script โดยตรง
     google.script.run.withSuccessHandler(function(res){
-      Notify.close();
-      document.getElementById('syncStatus').innerText='อัปเดตเรียบร้อย: '+res.syncTime+' ('+res.data.length+' รายการ)';
+      Notify.close(); document.getElementById('syncStatus').innerText='อัปเดตเรียบร้อย: '+res.syncTime+' ('+res.data.length+' รายการ)';
       rawData=res.data; setupStations(res.stations||[]); updateOverviewStats(rawData); runSearch();
-    }).withFailureHandler(function(err){
-      Notify.close(); Notify.error('ผิดพลาด', err.message);
-    }).getAllData();
+    }).withFailureHandler(function(err){ Notify.close(); Notify.error('ผิดพลาด', err.message); }).getAllData();
   }else{
-    // รันบน GitHub Pages
     fetch(API_URL).then(r=>r.json()).then(res=>{
-      Notify.close();
-      document.getElementById('syncStatus').innerText='อัปเดตเรียบร้อย: '+res.syncTime+' ('+res.data.length+' รายการ)';
+      Notify.close(); document.getElementById('syncStatus').innerText='อัปเดตเรียบร้อย: '+res.syncTime+' ('+res.data.length+' รายการ)';
       rawData=res.data; setupStations(res.stations||[]); updateOverviewStats(rawData); runSearch();
-    }).catch(e=>{
-      Notify.close(); document.getElementById('syncStatus').innerText='โหลดไม่สำเร็จ: '+e.message;
-      Notify.error('เชื่อมต่อ API ไม่ได้', e.message);
-    });
+    }).catch(e=>{ Notify.close(); Notify.error('เชื่อมต่อ API ไม่ได้', e.message); });
   }
 }
-
 function updateOverviewStats(data){ let done=0,pend=0; for(let i=0;i<data.length;i++){ let id=getStatusInfo(data[i].st).id; if(id==='1'||id==='3') done++; else pend++; } document.getElementById('statTotalCount').innerText=data.length+' รายการ'; document.getElementById('statDoneCount').innerText=done+' รายการ'; document.getElementById('statPendingCount').innerText=pend+' รายการ'; }
 function setupStations(st){ let sel=document.getElementById('stationSelect'); sel.innerHTML='<option value="">ทุก สภ.</option>'; for(let s of st){ let o=document.createElement('option'); o.value=s; o.textContent='สภ.'+s; sel.appendChild(o);} }
 function getStatusInfo(st){ if(!st) st=''; let s=st.toString(); if(s.indexOf('เสร็จ')>-1 && s.indexOf('รับผล')==-1) return {id:'1',label:'เสร็จแล้ว',tag:'tag-1',emoji:'🟢'}; if(s.indexOf('รับผล')>-1) return {id:'3',label:'รับผลแล้ว',tag:'tag-3',emoji:'📦'}; return {id:'2',label:'รอดำเนินการ',tag:'tag-2',emoji:'🟡'}; }
@@ -107,7 +89,7 @@ function runSearch(){
 function generateShareText(keyword, stationName){
   let now=new Date(); let dateTh=now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}); let timeTh=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
   let total=filteredData.length; let c1=0,c2=0; for(let it of filteredData){ let id=getStatusInfo(it.st).id; if(id==='1'||id==='3') c1++; else c2++; }
-  let msg=`🔬 ระบบติดตามสถานะงาน พฐ.จว.ตรัง\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📅 ${dateTh} | ⏰ ${timeTh}\n🏛️ ${stationName?'สภ.'+stationName:'ภาพรวมทุก สภ.'}${keyword?` | 🔎 "${keyword}"`:''}\n📊 สรุปรวม ${total} รายการ | ✅ ${c1} | 🟡 ${c2}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  let msg=`🔬 ระบบติดตามสถานะงาน พฐ.จว.ตรัง\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📅 ${dateTh} | ⏰ ${timeTh}\n🏛️ ${stationName?'สภ.'+stationName:'ภาพรวมทุก สภ. ใน จ.ตรัง'}${keyword?` | 🔎 "${keyword}"`:''}\n📊 สรุปรวม ${total} รายการ | ✅ ${c1} | 🟡 ${c2}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
   let types=[{key:'งานยาเสพติด',icon:'💊',title:'งานตรวจยาเสพติด'},{key:'งานที่เกิดเหตุ',icon:'🏠',title:'งานตรวจสถานที่เกิดเหตุ'},{key:'งานทะเบียนปืน',icon:'🔫',title:'งานทะเบียนปืน'}];
   for(let tp of types){
     let list=filteredData.filter(d=>d.t===tp.key); if(!list.length) continue;
@@ -140,7 +122,6 @@ function renderCards(data){
 function shareSingleCard(i){ window.open('https://social-plugins.line.me/lineit/share?text='+encodeURIComponent(shareStore[i]),'_blank'); }
 function shareToLine(){ window.open('https://social-plugins.line.me/lineit/share?text='+encodeURIComponent(currentFormattedMessage),'_blank'); }
 function copyShareText(){ navigator.clipboard.writeText(currentFormattedMessage).then(()=>Notify.copySuccess('คัดลอกข้อความสวยงามแล้ว!')); }
-
 document.getElementById('keyword').addEventListener('keydown',e=>{if(e.key==='Enter') runSearch();});
 document.getElementById('stationSelect').addEventListener('change',runSearch);
 document.getElementById('statusFilter').addEventListener('change',runSearch);
