@@ -403,8 +403,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // 🔴 *** ใส่ URL ของ Google Apps Script Web App ที่ก๊อปปี้มาจากขั้นตอนที่ 1 ที่นี่ ***
-  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx8a4FhQQLcAiJFFt3yPUvkbTIRA_QHgS8ccgdf8W1sgLB3IcC7USDmfOdaM3cSRrxNgQ/exec";
+  // 🔴 *** ใส่ URL ของ Google Apps Script Web App ที่นี่ ***
+  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzTNy2Zb9NABbp-7wz7SblXG1x6P-5xp7OcoQeSSfraEVdyGMA7SGEs9frv47fCGug-Aw/exec";
 
   let rawData = [];
   let filteredData = [];
@@ -437,6 +437,7 @@
   window.onload = () => {
     Notify.loading('กำลังโหลดและเตรียมข้อมูล...');
     
+    // ดึงข้อมูลจากแคชในเครื่องขึ้นมาก่อน
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       try {
@@ -452,8 +453,15 @@
   };
 
   function fetchDataFromAPI() {
-    fetch(GAS_API_URL)
-      .then(res => res.json())
+    // ใช้ redirect: 'follow' เพื่อให้ติดตาม URL ที่ Google Apps Script Redirect ออกมา
+    fetch(GAS_API_URL, {
+      method: 'GET',
+      redirect: 'follow'
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
       .then(res => {
         if (!res || !res.data) return;
         localStorage.setItem(CACHE_KEY, JSON.stringify(res));
