@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
-:root{--navy:#0b192c;--navy-light:#1e3e62;--gold:#d4af37;--bg:#f8fafc;--line-green:#06c755}
+:root{--navy:#0b192c;--gold:#d4af37;--bg:#f8fafc;--line-green:#06c755}
 body{font-family:'Sarabun',sans-serif;background:var(--bg)}
 .header-panel{background:linear-gradient(135deg,var(--navy),#112642);color:#fff;padding:45px 20px 70px;border-radius:0 0 45px 45px;text-align:center}
 .search-box{background:#fff;border-radius:24px;padding:30px;margin-top:-50px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
@@ -52,7 +52,8 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg)}
 <div class="row g-4" id="displayArea"></div>
 </div>
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycby15VcuGKvMEacd8nxadBTZwITqHTB5nITQbU-2aRcLtdwSC1OJE6kSdxrFp-SfJ7toQQ/exec?action=getData';
+// ลิงก์ใหม่ของคุณ
+const API_URL = 'https://script.google.com/macros/s/AKfycbyDrQkasvZG7lO7KoclCPU0KaJme4s79rQM2dZy4fPZeI89YlAgPHRJpdj056L8D8aqeQ/exec?action=getData';
 const Notify = {
  copySuccess: function(m){ Swal.fire({icon:'success',title:m||'คัดลอกแล้ว!',toast:true,position:'top',showConfirmButton:false,timer:2000}); },
  loading: function(t){ Swal.fire({title:t||'กำลังโหลด...',allowOutsideClick:false,didOpen:()=>{Swal.showLoading();}}); },
@@ -63,17 +64,17 @@ let rawData=[], filteredData=[], currentFormattedMessage='', shareStore=[];
 let IS_GAS = (typeof google!== 'undefined' && google.script && google.script.run);
 function updateData(){
   Notify.loading('กำลังเชื่อมต่อฐานข้อมูล...');
-  document.getElementById('modeBadge').innerText = IS_GAS? 'โหมด: Google Apps Script โดยตรง' : 'โหมด: GitHub Pages (API)';
+  document.getElementById('modeBadge').innerText = IS_GAS? 'โหมด: Google Apps Script' : 'โหมด: GitHub Pages';
   if(IS_GAS){
     google.script.run.withSuccessHandler(function(res){
-      Notify.close(); document.getElementById('syncStatus').innerText='อัปเดตเรียบร้อย: '+res.syncTime+' ('+res.data.length+' รายการ)';
+      Notify.close(); document.getElementById('syncStatus').innerText='อัปเดต: '+res.syncTime+' ('+res.data.length+' รายการ)';
       rawData=res.data; setupStations(res.stations||[]); updateOverviewStats(rawData); runSearch();
     }).withFailureHandler(function(err){ Notify.close(); Notify.error('ผิดพลาด', err.message); }).getAllData();
   }else{
     fetch(API_URL).then(r=>r.json()).then(res=>{
-      Notify.close(); document.getElementById('syncStatus').innerText='อัปเดตเรียบร้อย: '+res.syncTime+' ('+res.data.length+' รายการ)';
+      Notify.close(); document.getElementById('syncStatus').innerText='อัปเดต: '+res.syncTime+' ('+res.data.length+' รายการ)';
       rawData=res.data; setupStations(res.stations||[]); updateOverviewStats(rawData); runSearch();
-    }).catch(e=>{ Notify.close(); Notify.error('เชื่อมต่อ API ไม่ได้', e.message); });
+    }).catch(e=>{ Notify.close(); Notify.error('เชื่อมต่อไม่ได้', e.message); });
   }
 }
 function updateOverviewStats(data){ let done=0,pend=0; for(let i=0;i<data.length;i++){ let id=getStatusInfo(data[i].st).id; if(id==='1'||id==='3') done++; else pend++; } document.getElementById('statTotalCount').innerText=data.length+' รายการ'; document.getElementById('statDoneCount').innerText=done+' รายการ'; document.getElementById('statPendingCount').innerText=pend+' รายการ'; }
@@ -119,9 +120,24 @@ function renderCards(data){
     html+=`</div>`; area.innerHTML+=html;
   }
 }
-function shareSingleCard(i){ window.open('https://social-plugins.line.me/lineit/share?text='+encodeURIComponent(shareStore[i]),'_blank'); }
-function shareToLine(){ window.open('https://social-plugins.line.me/lineit/share?text='+encodeURIComponent(currentFormattedMessage),'_blank'); }
-function copyShareText(){ navigator.clipboard.writeText(currentFormattedMessage).then(()=>Notify.copySuccess('คัดลอกข้อความสวยงามแล้ว!')); }
+async function shareSingleCard(i){
+  let msg=shareStore[i]; if(!msg) return;
+  if(navigator.share){ try{ await navigator.share({text:msg}); return; }catch(e){ if(e.name==='AbortError') return; } }
+  window.location.href='https://line.me/R/msg/text/?'+encodeURIComponent(msg);
+}
+async function shareToLine(){
+  if(!currentFormattedMessage) return;
+  if(navigator.share){
+    try{ await navigator.share({title:'รายงาน พฐ.ตรัง', text:currentFormattedMessage}); Notify.copySuccess('แชร์เรียบร้อย!'); return; }catch(e){ if(e.name==='AbortError') return; }
+  }
+  if(currentFormattedMessage.length>2500){
+    await navigator.clipboard.writeText(currentFormattedMessage);
+    Swal.fire({icon:'info',title:'ข้อความยาวมาก ('+currentFormattedMessage.length+' ตัวอักษร)',text:'ระบบคัดลอกให้แล้ว เปิด LINE แล้ววางได้เลย',confirmButtonText:'เปิด LINE',showCancelButton:true,cancelButtonText:'ปิด'}).then(r=>{ if(r.isConfirmed) window.location.href='https://line.me/R/nv/chat'; });
+  }else{
+    window.location.href='https://line.me/R/msg/text/?'+encodeURIComponent(currentFormattedMessage);
+  }
+}
+function copyShareText(){ if(!currentFormattedMessage) return; navigator.clipboard.writeText(currentFormattedMessage).then(()=>Notify.copySuccess('คัดลอกแล้ว!')); }
 document.getElementById('keyword').addEventListener('keydown',e=>{if(e.key==='Enter') runSearch();});
 document.getElementById('stationSelect').addEventListener('change',runSearch);
 document.getElementById('statusFilter').addEventListener('change',runSearch);
