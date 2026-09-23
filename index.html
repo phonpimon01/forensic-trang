@@ -1,63 +1,54 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ระบบติดตามสถานะงาน พฐ.ตรัง</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบติดตามสถานะงาน พฐ.ตรัง | GitHub Edition</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-<style>
-body{font-family:'Sarabun',sans-serif;background:#f8fafc}
-.header{background:linear-gradient(135deg,#0b192c,#1e3e62);color:#fff;padding:50px 20px 70px;border-radius:0 0 40px 40px;text-align:center}
-.search-box{background:#fff;border-radius:24px;padding:30px;margin-top:-50px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
-.result-card{background:#fff;border-radius:16px;padding:20px;margin-bottom:12px;border:1px solid #e2e8f0;position:relative}
-</style>
+<style>body{font-family:'Sarabun',sans-serif;background:#f8fafc}.header{background:linear-gradient(135deg,#0b192c,#1e3e62);color:#fff;padding:60px 20px 80px;text-align:center;border-radius:0 0 40px 40px}.search-box{background:#fff;border-radius:24px;padding:24px;margin-top:-50px;box-shadow:0 10px 30px rgba(0,0,0,.08)}.card-case{background:#fff;border-radius:16px;padding:16px;border:1px solid #e2e8f0;margin-bottom:12px}</style>
 </head>
 <body>
-<div class="header"><h2 class="fw-bold">ระบบติดตามสถานะงานตรวจพิสูจน์</h2><div id="syncStatus" class="small opacity-75 mt-2">กำลังเชื่อมต่อ...</div></div>
-<div class="container mb-5">
+<div class="header"><h2 class="fw-bold">ระบบติดตามสถานะงาน พฐ.ตรัง</h2><p class="mb-0 opacity-75">GitHub Pages Edition • โหลดเร็ว • แชร์ LINE สวยงาม</p><div id="syncStatus" class="small mt-2">กำลังเชื่อมต่อ API...</div></div>
+<div class="container" style="max-width:900px">
 <div class="search-box">
-<input id="keyword" class="form-control mb-2" placeholder="ค้นหาเลขตรวจ, ชื่อ, สภ.">
-<div class="row"><div class="col-6"><select id="stationSelect" class="form-select"></select></div><div class="col-6"><select id="statusFilter" class="form-select"><option value="all">ทุกสถานะ</option><option value="1">✅ เสร็จแล้ว</option><option value="2">⏳ รอดำเนินการ</option><option value="3">📦 รับผลแล้ว</option></select></div></div>
+<input id="keyword" class="form-control mb-2" placeholder="ค้นหาเลขตรวจ / ชื่อ / สภ.">
+<div class="row g-2"><div class="col-6"><select id="stationSelect" class="form-select"><option>ทุก สภ.</option></select></div><div class="col-6"><select id="statusFilter" class="form-select"><option value="all">ทุกสถานะ</option><option value="1">เสร็จแล้ว</option><option value="2">รอดำเนินการ</option><option value="3">รับผลแล้ว</option></select></div></div>
 <button class="btn btn-warning w-100 mt-3 fw-bold" onclick="runSearch()">ค้นหาทันที</button>
+<div id="shareBox" class="d-none mt-4"><pre id="shareText" style="white-space:pre-wrap;background:#f1f5f9;padding:16px;border-radius:16px;font-size:13px;max-height:400px;overflow:auto"></pre><div class="d-flex gap-2"><button class="btn btn-success flex-fill" onclick="shareToLine()">แชร์ไป LINE</button><button class="btn btn-dark" onclick="navigator.clipboard.writeText(currentMsg).then(()=>alert('คัดลอกแล้ว'))">คัดลอก</button></div></div>
 </div>
-<div id="shareBox" class="d-none mt-4"><div class="card p-3"><h6>ข้อความสำหรับแชร์ LINE</h6><pre id="shareTextDisplay" style="white-space:pre-wrap;background:#f8fafc;padding:12px;border-radius:12px;font-size:13px;max-height:300px;overflow:auto"></pre><div class="d-flex gap-2"><button class="btn btn-success flex-fill" onclick="shareToLine()">แชร์ไป LINE</button><button class="btn btn-dark" onclick="copyShareText()">คัดลอก</button></div></div></div>
-<div id="displayArea" class="row mt-4"></div>
+<div id="list" class="mt-4"></div>
 </div>
 <script>
-// ★★★ ใส่ลิงก์ /exec ของคุณตรงนี้ ★★★
-const API_URL = 'https://script.google.com/macros/s/AKfycbxaJhZ3BHIEVH-ACMRqFCwedqCsmWxD76T718cp27hphhQbV1P2t0XsjIRK2FLaWAcFIA/exec';
+// ★★★ เอาลิงก์ API ที่ได้จากส่วนที่ 1 มาวางตรงนี้ ★★★
+const API_URL = 'https://script.google.com/macros/s/AKfycbyd_iGCdjm4tthtWlqjY7utxVUyKYeLMQ85g7J2r7Ut9UkBE48IPC7wOm1zbQ1DcJqOeg/exec';
 
-let rawData=[], filteredData=[], currentFormattedMessage='', shareStore=[];
-async function loadData(){
+let rawData=[], filteredData=[], currentMsg='';
+async function init(){
   try{
-    const res = await fetch(API_URL);
-    const json = await res.json();
-    rawData=json.data||[]; document.getElementById('syncStatus').innerText='อัปเดต: '+json.syncTime+' ('+rawData.length+' รายการ)';
-    const sel=document.getElementById('stationSelect'); sel.innerHTML='<option value="">ทุก สภ.</option>'; json.stations.forEach(s=>{ let o=document.createElement('option');o.value=s;o.text='สภ.'+s;sel.appendChild(o);});
+    const r = await fetch(API_URL); const j = await r.json();
+    rawData=j.data||[]; document.getElementById('syncStatus').innerText='อัปเดต: '+j.syncTime+' ('+rawData.length+' รายการ)';
+    const sel=document.getElementById('stationSelect'); sel.innerHTML='<option value="">ทุก สภ.</option>'; j.stations.forEach(s=>{ let o=document.createElement('option');o.value=s;o.textContent='สภ.'+s;sel.appendChild(o);});
     runSearch();
   }catch(e){ document.getElementById('syncStatus').innerText='โหลดไม่สำเร็จ: '+e.message; }
 }
-// ใส่ฟังก์ชัน getStatusInfo, groupByStation, generateShareText, renderCards แบบสวยงามที่ผมให้ไปก่อนหน้านี้ตรงนี้ (ใช้ชุดล่าสุดที่ไม่มี Backtick)
-function getStatusInfo(st){ if(!st) st=''; var s=st.toString(); if(s.indexOf('เสร็จ')>-1 && s.indexOf('รับผล')==-1) return {id:'1',emoji:'🟢'}; if(s.indexOf('รับผล')>-1) return {id:'3',emoji:'📦'}; return {id:'2',emoji:'🟡'}; }
+function getStatusInfo(st){ if(!st) st=''; var s=st.toString(); if(s.indexOf('เสร็จ')>-1&&s.indexOf('รับผล')==-1) return {id:'1',emoji:'🟢'}; if(s.indexOf('รับผล')>-1) return {id:'3',emoji:'📦'}; return {id:'2',emoji:'🟡'}; }
 function groupByStation(items){ var acc={}; for(var i=0;i<items.length;i++){ var k=items[i].s||'ไม่ระบุ'; if(!acc[k]) acc[k]=[]; acc[k].push(items[i]); } return acc; }
 function runSearch(){
-  var key=document.getElementById('keyword').value.trim().toLowerCase();
-  var station=document.getElementById('stationSelect').value;
-  var statFilt=document.getElementById('statusFilter').value;
-  filteredData=[]; for(var i=0;i<rawData.length;i++){ var it=rawData[i]; var info=getStatusInfo(it.st); var mKey=!key||it.n.toLowerCase().indexOf(key)>-1||it.id.toLowerCase().indexOf(key)>-1; var mStation=!station||it.s===station; var mStatus=statFilt==='all'||info.id===statFilt; if(mKey&&mStation&&mStatus) filteredData.push(it); }
-  if(filteredData.length>0){ generateShareText(key,station); renderCards(filteredData); document.getElementById('shareBox').classList.remove('d-none'); } else { document.getElementById('displayArea').innerHTML='<div class="text-center p-5">ไม่พบข้อมูล</div>'; }
+  var key=document.getElementById('keyword').value.toLowerCase(); var st=document.getElementById('stationSelect').value; var sf=document.getElementById('statusFilter').value;
+  filteredData=rawData.filter(function(it){ var info=getStatusInfo(it.st); return (!key||it.n.toLowerCase().indexOf(key)>-1||it.id.toLowerCase().indexOf(key)>-1) && (!st||it.s===st) && (sf==='all'||info.id===sf); });
+  generateShareText(); render();
 }
-function generateShareText(keyword, stationName){
+function generateShareText(){
   var now=new Date(); var dateTh=now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}); var timeTh=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
-  var total=filteredData.length; var msg=''; msg+='🔬 ระบบติดตามสถานะงาน พฐ.จว.ตรัง\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📅 '+dateTh+' | ⏰ '+timeTh+'\n🏛️ '+(stationName?'สภ.'+stationName:'ภาพรวมทุก สภ.')+'\n📊 สรุปรวม '+total+' รายการ\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+  var msg=''; msg+='🔬 ระบบติดตามสถานะงาน พฐ.จว.ตรัง\n'; msg+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'; msg+='📅 '+dateTh+' | ⏰ '+timeTh+'\n'; msg+='📊 สรุปรวม '+filteredData.length+' รายการ\n'; msg+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
   var types=[{key:'งานยาเสพติด',icon:'💊',title:'งานตรวจยาเสพติด'},{key:'งานที่เกิดเหตุ',icon:'🏠',title:'งานตรวจสถานที่เกิดเหตุ'},{key:'งานทะเบียนปืน',icon:'🔫',title:'งานทะเบียนปืน'}];
-  for(var t=0;t<types.length;t++){ var list=[]; for(var i=0;i<filteredData.length;i++) if(filteredData[i].t===types[t].key) list.push(filteredData[i]); if(list.length===0) continue; msg+=types[t].icon+' '+types[t].title+' : '+list.length+' คดี\n┈┈┈┈┈┈\n'; var grouped=groupByStation(list); var keys=Object.keys(grouped).sort(function(a,b){return a.localeCompare(b,'th');}); for(var k=0;k<keys.length;k++){ var st=keys[k]; var arr=grouped[st]; msg+='📍 สภ.'+st+' ('+arr.length+' คดี)\n'; for(var j=0;j<arr.length;j++){ var d=arr[j]; var info=getStatusInfo(d.st); var pre=j===arr.length-1?' └ ':' ├ '; msg+=pre+info.emoji+' '+d.id+' • '+d.n+'\n'; } msg+='\n'; } }
-  msg+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n💡 🟢=เสร็จแล้ว | 🟡=รอดำเนินการ | 📦=รับผลแล้ว\n🤖 รายงานอัตโนมัติ พฐ.ตรัง'; currentFormattedMessage=msg; document.getElementById('shareTextDisplay').textContent=msg;
+  for(var t=0;t<types.length;t++){ var list=filteredData.filter(function(x){return x.t===types[t].key;}); if(!list.length) continue; msg+=types[t].icon+' '+types[t].title+' : '+list.length+' คดี\n┈┈┈┈┈┈\n'; var grouped=groupByStation(list); Object.keys(grouped).sort(function(a,b){return a.localeCompare(b,'th');}).forEach(function(k){ msg+='📍 สภ.'+k+' ('+grouped[k].length+' คดี)\n'; grouped[k].forEach(function(d,j){ var info=getStatusInfo(d.st); msg+=(j===grouped[k].length-1?' └ ':' ├ ')+info.emoji+' '+d.id+' • '+d.n+'\n'; }); msg+='\n'; }); }
+  msg+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n💡 🟢=เสร็จแล้ว | 🟡=รอดำเนินการ | 📦=รับผลแล้ว\n🤖 รายงานอัตโนมัติ พฐ.ตรัง'; currentMsg=msg; document.getElementById('shareText').textContent=msg; document.getElementById('shareBox').classList.remove('d-none');
 }
-function renderCards(data){ var area=document.getElementById('displayArea'); area.innerHTML=''; var html=''; for(var i=0;i<data.length;i++){ var it=data[i]; html+='<div class="col-md-4"><div class="result-card"><b>'+it.id+'</b><br>'+it.n+'<br><small>สภ.'+it.s+' | '+it.d+'</small><br><span>'+it.st+'</span></div></div>'; } area.innerHTML=html; }
-function shareToLine(){ window.open('https://social-plugins.line.me/lineit/share?text='+encodeURIComponent(currentFormattedMessage),'_blank'); }
-function copyShareText(){ navigator.clipboard.writeText(currentFormattedMessage).then(function(){ alert('คัดลอกแล้ว'); }); }
-window.onload=loadData;
+function render(){ var html=''; for(var i=0;i<filteredData.length;i++){ var it=filteredData[i]; var info=getStatusInfo(it.st); html+='<div class="card-case"><b>'+it.id+'</b> '+info.emoji+'<br>'+it.n+'<br><small>สภ.'+it.s+' | '+it.d+' | '+it.st+'</small></div>'; } document.getElementById('list').innerHTML=html; }
+function shareToLine(){ window.open('https://social-plugins.line.me/lineit/share?text='+encodeURIComponent(currentMsg),'_blank'); }
+window.onload=init;
 </script>
 </body>
 </html>
