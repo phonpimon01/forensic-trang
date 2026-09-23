@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
+  <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>🔍 ตรวจสอบสถานะงาน พฐ.จว.ตรัง</title>
+  <title>🔍 ตรวจสอบสถานะงาน พฐ.ตรัง</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- SweetAlert2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
   <style>
     :root { 
       --navy: #0b192c; 
@@ -58,7 +58,9 @@
       border: 1px solid rgba(255, 255, 255, 0.8);
       transition: all 0.3s ease;
     }
-    .search-box:hover { box-shadow: var(--hover-shadow); }
+    .search-box:hover {
+      box-shadow: var(--hover-shadow);
+    }
 
     .custom-input { 
       border-radius: 14px; 
@@ -186,9 +188,9 @@
       margin-top: 12px; 
       gap: 5px;
     }
-    .tag-1 { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; } 
-    .tag-2 { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; } 
-    .tag-3 { background: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; } 
+    .tag-1 { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .tag-2 { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .tag-3 { background: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; }
 
     .btn-line-mini { 
       background: var(--line-green); 
@@ -196,7 +198,7 @@
       border-radius: 10px; 
       padding: 6px 14px; 
       font-size: 11.5px; 
-      text-decoration: none; 
+      border: none;
       position: absolute; 
       top: 20px; 
       right: 20px; 
@@ -206,8 +208,13 @@
       gap: 4px;
       box-shadow: 0 4px 10px rgba(6, 199, 85, 0.3);
       transition: all 0.2s;
+      cursor: pointer;
     }
-    .btn-line-mini:hover { background: #05b34c; color: white; transform: scale(1.05); }
+    .btn-line-mini:hover { 
+      background: #05b34c; 
+      color: white; 
+      transform: scale(1.05);
+    }
 
     .info-row { font-size: 0.9rem; color: #64748b; display: flex; align-items: center; margin-bottom: 6px; gap: 8px; }
     
@@ -218,6 +225,7 @@
       padding: 25px; 
       margin-bottom: 35px; 
       box-shadow: 0 10px 30px rgba(212, 175, 55, 0.12); 
+      animation: fadeIn 0.5s ease;
     }
     .share-text-area { 
       background: #f8fafc; 
@@ -233,33 +241,45 @@
       color: #1e293b; 
       line-height: 1.6; 
     }
-    .btn-line-share { background-color: var(--line-green); color: white; font-weight: 700; border-radius: 14px; border: none; padding: 12px 20px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .btn-line-share:hover { background-color: #05b34c; color: white; }
-    .btn-copy { background-color: var(--navy); color: white; font-weight: 700; border-radius: 14px; border: none; padding: 12px 20px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .btn-copy:hover { background-color: #112642; color: white; }
+    .btn-line-share { background-color: var(--line-green); color: white; font-weight: 700; border-radius: 14px; border: none; padding: 12px 20px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-line-share:hover { background-color: #05b34c; color: white; transform: translateY(-1px); }
+    .btn-copy { background-color: var(--navy); color: white; font-weight: 700; border-radius: 14px; border: none; padding: 12px 20px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+    .btn-copy:hover { background-color: #112642; color: white; transform: translateY(-1px); }
 
-    .filter-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin-top: 15px; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      margin-top: 15px;
+    }
     .filter-pill {
-      background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;
-      padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
-      white-space: nowrap; cursor: pointer; transition: all 0.2s;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .filter-pill.active, .filter-pill:hover { background: var(--navy); color: white; border-color: var(--navy); }
-
-    .app-toast {
-      position: fixed; top: -80px; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; gap: 10px; background: #ffffff; color: #1f2937;
-      padding: 12px 22px; border-radius: 50px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-      border: 1px solid #e5e7eb; z-index: 99999; font-size: 14px; font-weight: 500;
-      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); opacity: 0; pointer-events: none;
+    .filter-pill.active, .filter-pill:hover {
+      background: var(--navy);
+      color: white;
+      border-color: var(--navy);
     }
-    .app-toast.show { top: 24px; opacity: 1; pointer-events: auto; }
-    .app-toast-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; flex-shrink: 0; background-color: #10b981; }
-    .swal2-popup { font-family: 'Sarabun', sans-serif !important; border-radius: 16px !important; }
   </style>
 </head>
 <body>
 
+<!-- Header Banner -->
 <div class="header-panel text-center">
   <div class="badge bg-white text-dark px-3 py-1 rounded-pill mb-2 fw-bold shadow-sm" style="font-size: 0.8rem; color: var(--navy) !important;">
     <i class="material-icons-round align-middle me-1" style="font-size: 14px; color: var(--gold);">verified</i> ส่วนงานพิสูจน์หลักฐานจังหวัดตรัง
@@ -268,6 +288,7 @@
   <div id="syncStatus" class="small text-white-50 mt-2">กำลังเชื่อมต่อฐานข้อมูล...</div>
 </div>
 
+<!-- Search & Dashboard Container -->
 <div class="container mb-5">
   <div class="search-box">
     <div class="row g-3">
@@ -289,6 +310,7 @@
         </select>
       </div>
 
+      <!-- Quick Filter Pills -->
       <div class="col-12">
         <div class="filter-pills">
           <span class="text-muted small align-self-center fw-bold me-1">ทางลัด:</span>
@@ -307,10 +329,13 @@
     </div>
   </div>
 
+  <!-- Realtime Statistics Overview Bar -->
   <div class="row g-3 mt-4" id="statsOverviewContainer">
     <div class="col-md-4">
       <div class="stat-card">
-        <div class="stat-icon bg-info bg-opacity-10 text-info"><i class="material-icons-round">folder_shared</i></div>
+        <div class="stat-icon bg-info bg-opacity-10 text-info">
+          <i class="material-icons-round">folder_shared</i>
+        </div>
         <div>
           <div class="text-muted small fw-bold">ข้อมูลในระบบทั้งหมด</div>
           <h4 class="fw-bold mb-0 text-navy" id="statTotalCount">0 <span class="fs-6 fw-normal text-muted">รายการ</span></h4>
@@ -319,7 +344,9 @@
     </div>
     <div class="col-md-4">
       <div class="stat-card">
-        <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="material-icons-round">check_circle</i></div>
+        <div class="stat-icon bg-success bg-opacity-10 text-success">
+          <i class="material-icons-round">check_circle</i>
+        </div>
         <div>
           <div class="text-muted small fw-bold">ดำเนินการเสร็จสิ้น</div>
           <h4 class="fw-bold mb-0 text-success" id="statDoneCount">0 <span class="fs-6 fw-normal text-muted">รายการ</span></h4>
@@ -328,7 +355,9 @@
     </div>
     <div class="col-md-4">
       <div class="stat-card">
-        <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="material-icons-round">pending_actions</i></div>
+        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+          <i class="material-icons-round">pending_actions</i>
+        </div>
         <div>
           <div class="text-muted small fw-bold">อยู่ระหว่างดำเนินการ</div>
           <h4 class="fw-bold mb-0 text-warning" id="statPendingCount">0 <span class="fs-6 fw-normal text-muted">รายการ</span></h4>
@@ -339,6 +368,7 @@
 </div>
 
 <div class="container-fluid px-3 mb-5">
+  <!-- Share Section -->
   <div id="summaryShareSection" class="d-none">
     <div class="container">
       <div class="share-summary-box">
@@ -361,57 +391,71 @@
     </div>
   </div>
 
+  <!-- Main Display Cards Grid Area -->
   <div class="row g-4" id="displayArea">
     <div class="col-12 text-center py-5 opacity-50">
       <i class="material-icons-round text-muted" style="font-size: 80px;">saved_search</i>
-      <h5 class="fw-bold text-muted mt-3">กำลังโหลดข้อมูล กรุณารอสักครู่...</h5>
+      <h5 class="fw-bold text-muted mt-3">ระบบพร้อมใช้งาน</h5>
+      <p class="text-muted small">กรุณากดปุ่ม "ค้นหาข้อมูลทันที" หรือระบุเงื่อนไขด้านบนเพื่อเรียกดูข้อมูล</p>
     </div>
   </div>
 </div>
 
-<!-- Toast Container -->
-<div id="appToast" class="app-toast">
-  <div class="app-toast-icon" id="appToastIcon">✓</div>
-  <div class="app-toast-message" id="appToastMessage">แจ้งเตือนสำเร็จ</div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // 🔗 ใส่ Web App URL ของ Google Apps Script ของคุณเรียบร้อยแล้ว
-  const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxDz5nTAk0R_rKJyiXVFY6rxA2NIeCuF2v5HicpLEyLiQLqzMqzeV114lL7czppJfwyjQ/exec?action=getData';
+  // 🔴 *** ใส่ URL ของ Google Apps Script Web App ที่ก๊อปปี้มาจากขั้นตอนที่ 1 ที่นี่ ***
+  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx8a4FhQQLcAiJFFt3yPUvkbTIRA_QHgS8ccgdf8W1sgLB3IcC7USDmfOdaM3cSRrxNgQ/exec";
 
   let rawData = [];
   let filteredData = [];
   let currentFormattedMessage = "";
-  const CACHE_KEY = 'forensic_trang_vercel_v1';
+  const CACHE_KEY = 'forensic_trang_2026_modern';
 
   const Notify = {
     copySuccess: function(msg = 'คัดลอกข้อความสรุปเรียบร้อยแล้ว!') {
-      Swal.fire({ icon: 'success', title: msg, toast: true, position: 'top', showConfirmButton: false, timer: 1800, timerProgressBar: true });
+      Swal.fire({
+        icon: 'success',
+        title: msg,
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 1800,
+        timerProgressBar: true,
+        background: '#ffffff',
+        iconColor: '#10b981'
+      });
     },
-    error: function(title, text) { Swal.fire({ icon: 'error', title: title, text: text, confirmButtonText: 'ปิด' }); },
-    warning: function(title, text) { Swal.fire({ icon: 'warning', title: title, text: text, confirmButtonText: 'รับทราบ' }); },
-    loading: function(title = 'กำลังโหลดข้อมูล...') { Swal.fire({ title: title, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } }); },
+    error: function(title = 'เกิดข้อผิดพลาด!', text = 'กรุณาลองใหม่อีกครั้ง') {
+      Swal.fire({ icon: 'error', title: title, text: text, confirmButtonColor: '#dc2626', confirmButtonText: 'ปิด' });
+    },
+    loading: function(title = 'กำลังโหลดข้อมูล...') {
+      Swal.fire({ title: title, allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+    },
     close: function() { Swal.close(); }
   };
 
   window.onload = () => {
-    Notify.loading('กำลังเชื่อมต่อฐานข้อมูล...');
+    Notify.loading('กำลังโหลดและเตรียมข้อมูล...');
+    
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
-      const p = JSON.parse(cached);
-      rawData = p.data;
-      setupStations(p.stations);
-      updateOverviewStats(rawData);
-      Notify.close();
-      runSearch();
+      try {
+        const p = JSON.parse(cached);
+        rawData = p.data || [];
+        setupStations(p.stations || []);
+        updateOverviewStats(rawData);
+        Notify.close();
+        runSearch();
+      } catch(e) { console.error(e); }
     }
-    updateData();
+    fetchDataFromAPI();
   };
 
-  function updateData() {
+  function fetchDataFromAPI() {
     fetch(GAS_API_URL)
       .then(res => res.json())
       .then(res => {
+        if (!res || !res.data) return;
         localStorage.setItem(CACHE_KEY, JSON.stringify(res));
         rawData = res.data;
         setupStations(res.stations);
@@ -421,9 +465,9 @@
         runSearch();
       })
       .catch(err => {
-        console.error(err);
+        console.error("Fetch API Error:", err);
+        document.getElementById('syncStatus').innerText = 'ไม่สามารถดึงข้อมูลล่าสุดได้ ใช้ข้อมูลแคชชั่วคราว';
         Notify.close();
-        Notify.error('ดึงข้อมูลไม่สำเร็จ', 'ไม่สามารถเชื่อมต่อฐานข้อมูล Google Sheets ได้ กรุณาตรวจสอบการอนุญาตสิทธิ์ Web App (Anyone)');
       });
   }
 
@@ -446,6 +490,7 @@
   }
 
   function getStatusInfo(st) {
+    if (!st) st = "";
     if (st.includes('เสร็จ') && !st.includes('รับผล')) return { id: "1", label: 'เสร็จแล้ว', tag: 'tag-1', icon: 'check_circle', emoji: '🟢' };
     if (st.includes('รับผล')) return { id: "3", label: 'รับผลแล้ว', tag: 'tag-3', icon: 'history', emoji: '📦' };
     return { id: "2", label: 'รอดำเนินการ', tag: 'tag-2', icon: 'pending', emoji: '🟡' };
@@ -570,9 +615,9 @@
     const area = document.getElementById('displayArea');
     area.innerHTML = '';
     const config = [
-      { t: "งานยาเสพติด", i: "medication", label: "ชื่อผู้ต้องหา" },
-      { t: "งานที่เกิดเหตุ", i: "location_searching", label: "พนักงานสอบสวน" },
-      { t: "งานทะเบียนปืน", i: "security", label: "พนักงานสอบสวน" }
+      { t: "งานยาเสพติด", i: "medication", label: "ชื่อผู้ต้องหา", color: "text-danger" },
+      { t: "งานที่เกิดเหตุ", i: "location_searching", label: "พนักงานสอบสวน", color: "text-primary" },
+      { t: "งานทะเบียนปืน", i: "security", label: "พนักงานสอบสวน", color: "text-warning" }
     ];
 
     config.forEach(conf => {
@@ -607,9 +652,9 @@
 
             html += `
               <div class="result-card">
-                <a href="#" class="btn-line-mini" onclick="window.open('https://line.me/R/msg/text/?'+encodeURIComponent(\`${shareMsg}\`), '_blank')">
+                <button class="btn-line-mini" data-msg="${encodeURIComponent(shareMsg)}" onclick="shareSingleCard(this)">
                   <i class="material-icons-round" style="font-size:14px;">share</i> แชร์การ์ด
-                </a>
+                </button>
                 <div class="case-id-header">${item.id}</div>
                 <div class="mb-2">
                   <span style="font-size:0.75rem; color:#94a3b8; display:block; font-weight: 600;">${conf.label}</span>
@@ -631,20 +676,42 @@
     });
   }
 
+  function shareSingleCard(btn) {
+    const encodedMsg = btn.getAttribute('data-msg');
+    const targetUrl = `https://social-plugins.line.me/lineit/share?text=${encodedMsg}`;
+    window.open(targetUrl, '_blank');
+  }
+
   function shareToLine() {
     if (!currentFormattedMessage) return;
+
     if (navigator.share) {
-      navigator.share({ title: 'สรุปรายงานการตรวจพิสูจน์ พฐ.จว.ตรัง', text: currentFormattedMessage }).catch(() => {});
+      navigator.share({
+        title: 'สรุปรายงานการตรวจพิสูจน์ พฐ.จว.ตรัง',
+        text: currentFormattedMessage
+      }).catch(err => console.log('User cancelled share'));
     } else {
-      copyShareText();
+      const encodedMsg = encodeURIComponent(currentFormattedMessage);
+      window.open('https://social-plugins.line.me/lineit/share?text=' + encodedMsg, '_blank');
     }
   }
 
   function copyShareText() {
     if (!currentFormattedMessage) return;
-    navigator.clipboard.writeText(currentFormattedMessage).then(() => {
+    
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(currentFormattedMessage).then(() => {
+        Notify.copySuccess('คัดลอกข้อความสรุปเรียบร้อยแล้ว!');
+      });
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = currentFormattedMessage;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
       Notify.copySuccess('คัดลอกข้อความสรุปเรียบร้อยแล้ว!');
-    });
+    }
   }
 </script>
 
